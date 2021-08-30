@@ -3,6 +3,7 @@ package internal
 import (
 	"crypto/sha1"
 	"encoding/hex"
+	"time"
 )
 
 type Short struct {
@@ -29,15 +30,13 @@ func NewShort(scheme, host, path, query string) (*Short, error) {
 		urlBody = host + path
 	}
 
-	hasher := sha1.New()
-	_, err := hasher.Write([]byte(urlBody))
+	hash, err := createHash(urlBody)
 	if err != nil {
 		return nil, err
 	}
-	hash := hex.EncodeToString(hasher.Sum(nil))
 
 	short := &Short{
-		RedirectPath: hash[:7],
+		RedirectPath: *hash,
 		Scheme:       scheme,
 		Host:         host,
 		Path:         path,
@@ -45,4 +44,18 @@ func NewShort(scheme, host, path, query string) (*Short, error) {
 	}
 
 	return short, nil
+}
+
+func createHash(text string) (*string, error) {
+	now := time.Now().String() // This ensures the hash is always unique, since time always moves forward
+
+	hasher := sha1.New()
+	_, err := hasher.Write([]byte(text + now))
+	if err != nil {
+		return nil, err
+	}
+	hash := hex.EncodeToString(hasher.Sum(nil))
+	hash = hash[:7] // use only first 6 characters - needs to be a short url right?
+
+	return &hash, nil
 }
