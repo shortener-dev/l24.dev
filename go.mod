@@ -1,3 +1,5 @@
+// +heroku goVersion go1.17
+
 module url-shortnener
 
 go 1.17
