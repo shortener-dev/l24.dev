@@ -5,8 +5,8 @@ CREATE TABLE urls (
     redirect_path VARCHAR NOT NULL UNIQUE,
     scheme VARCHAR NOT NULL,
     host VARCHAR NOT NULL,
-    path VARCHAR NOT NULL,
-    query VARCHAR NOT NULL
+    path VARCHAR,
+    query VARCHAR
 )
 -- +goose StatementEnd
 

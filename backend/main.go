@@ -6,9 +6,7 @@ import (
 	"net/http"
 	"os"
 	"time"
-	"url-shortnener/internal"
-
-	_ "github.com/lib/pq" // Postgres Driver
+	"url-shortnener/shortener"
 
 	"github.com/gorilla/mux"
 )
@@ -19,14 +17,14 @@ func main() {
 
 	db, err := sql.Open(driver, dbstring)
 	if err != nil {
-		log.Fatalf("failed to connect to database: %v", err)
+		log.Fatalf("failed to open to database: %v", err)
 	}
 
 	router := mux.NewRouter()
 
-	dao := internal.NewShortPostgresDao(db, driver)
-	getShortHandler := internal.NewGetShortHandler(dao)
-	createShortHandler := internal.NewCreateShortHandler(dao)
+	dao := shortener.NewShortPostgresDao(db, driver)
+	getShortHandler := shortener.NewGetShortHandler(dao)
+	createShortHandler := shortener.NewCreateShortHandler(dao)
 
 	router.HandleFunc("/{short}", getShortHandler).Methods(http.MethodGet)
 	router.HandleFunc("/short", createShortHandler).Methods(http.MethodPost)
