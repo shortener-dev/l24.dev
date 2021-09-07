@@ -6,7 +6,6 @@ To run locally:
 
 - `make build`
 - `docker-compose up -d`
-- `make goose-up`
 - `export DBSTRING="user=user dbname=public password=password host=localhost sslmode=disable"`
 - `export DRIVER="postgres"`
 - `./bin/main`

@@ -9,6 +9,7 @@ import (
 	"url-shortnener/shortener"
 
 	"github.com/gorilla/mux"
+	"github.com/pressly/goose/v3"
 )
 
 func main() {
@@ -18,6 +19,11 @@ func main() {
 	db, err := sql.Open(driver, dbstring)
 	if err != nil {
 		log.Fatalf("failed to open to database: %v", err)
+	}
+
+	err = goose.Up(db, "migrations")
+	if err != nil {
+		log.Fatalf("failed to run migrations: %v", err)
 	}
 
 	router := mux.NewRouter()
