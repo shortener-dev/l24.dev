@@ -7,7 +7,9 @@ CREATE TABLE urls (
     host VARCHAR NOT NULL,
     path VARCHAR,
     query VARCHAR
-)
+);
+
+CREATE INDEX redirect_path_idx ON urls USING HASH (redirect_path);
 -- +goose StatementEnd
 
 -- +goose Down
