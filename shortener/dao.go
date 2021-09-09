@@ -1,8 +1,10 @@
 package shortener
 
 import (
+	"context"
 	"database/sql"
 
+	"github.com/hashicorp/go-multierror"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq" // Postgres Driver
 )
@@ -16,8 +18,8 @@ const (
 )
 
 type ShortDAO interface {
-	InsertShort(short Short) error
-	GetShort(redirect_path string) (*Short, error)
+	InsertShort(ctx context.Context, short Short) error
+	GetShort(ctx context.Context, redirect_path string) (*Short, error)
 }
 
 func NewShortPostgresDao(db *sql.DB, driver string) *ShortPostgresDAO {
@@ -29,7 +31,7 @@ type ShortPostgresDAO struct {
 	driver string
 }
 
-func (s *ShortPostgresDAO) InsertShort(short Short) error {
+func (s *ShortPostgresDAO) InsertShort(ctx context.Context, short Short) error {
 	db := sqlx.NewDb(s.db, s.driver)
 
 	var err error
@@ -37,6 +39,7 @@ func (s *ShortPostgresDAO) InsertShort(short Short) error {
 	switch {
 	case isNilOrEmptyString(short.Path) && isNilOrEmptyString(short.Query):
 		err = executeTransaction(
+			ctx,
 			*db,
 			InsertShortQuery,
 			short.RedirectPath,
@@ -45,6 +48,7 @@ func (s *ShortPostgresDAO) InsertShort(short Short) error {
 		)
 	case isNilOrEmptyString(short.Path):
 		err = executeTransaction(
+			ctx,
 			*db,
 			InsertShortWithQueryQuery,
 			short.RedirectPath,
@@ -54,6 +58,7 @@ func (s *ShortPostgresDAO) InsertShort(short Short) error {
 		)
 	case isNilOrEmptyString(short.Query):
 		err = executeTransaction(
+			ctx,
 			*db,
 			InsertShortWithPathQuery,
 			short.RedirectPath,
@@ -63,6 +68,7 @@ func (s *ShortPostgresDAO) InsertShort(short Short) error {
 		)
 	default:
 		err = executeTransaction(
+			ctx,
 			*db,
 			InsertShortWithAllQuery,
 			short.RedirectPath,
@@ -76,10 +82,10 @@ func (s *ShortPostgresDAO) InsertShort(short Short) error {
 	return err
 }
 
-func (s *ShortPostgresDAO) GetShort(redirect_path string) (*Short, error) {
+func (s *ShortPostgresDAO) GetShort(ctx context.Context, redirect_path string) (*Short, error) {
 	db := sqlx.NewDb(s.db, s.driver)
 
-	row := db.QueryRowx(GetShortQuery, redirect_path)
+	row := db.QueryRowxContext(ctx, GetShortQuery, redirect_path)
 
 	var short Short
 	err := row.StructScan(&short)
@@ -102,30 +108,29 @@ func isNilOrEmptyString(text *string) bool {
 	return false
 }
 
-func executeTransaction(db sqlx.DB, query string, args ...interface{}) error {
+func executeTransaction(ctx context.Context, db sqlx.DB, query string, args ...interface{}) error {
+	var err error
 	tx, err := db.Beginx()
 	if err != nil {
 		return err
 	}
 
-	_, err = tx.Exec(
+	_, err = tx.ExecContext(
+		ctx,
 		query,
 		args...,
 	)
-
 	if err != nil {
-		rollbackErr := tx.Rollback()
-		if rollbackErr != nil {
-			return rollbackErr
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			err = multierror.Append(err, rollbackErr)
 		}
 		return err
 	}
 
 	err = tx.Commit()
 	if err != nil {
-		rollbackErr := tx.Rollback()
-		if rollbackErr != nil {
-			return rollbackErr
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			err = multierror.Append(err, rollbackErr)
 		}
 		return err
 	}

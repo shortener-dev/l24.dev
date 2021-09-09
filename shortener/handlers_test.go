@@ -66,7 +66,7 @@ func TestCreateShortHandler(t *testing.T) {
 			dao := mocks.NewMockShortDAO(mock)
 			dao.
 				EXPECT().
-				InsertShort(gomock.AssignableToTypeOf(shortener.Short{})).
+				InsertShort(gomock.Any(), gomock.AssignableToTypeOf(shortener.Short{})).
 				Return(nil).
 				Times(1)
 
@@ -136,7 +136,7 @@ func TestGetShortHandler(t *testing.T) {
 			dao := mocks.NewMockShortDAO(mock)
 			dao.
 				EXPECT().
-				GetShort(gomock.Any()).
+				GetShort(gomock.Any(), gomock.Any()).
 				Return(test.ExpectedShort, test.ExpectedError).
 				Times(1)
 

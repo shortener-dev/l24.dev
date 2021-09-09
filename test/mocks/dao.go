@@ -5,6 +5,7 @@
 package mocks
 
 import (
+	context "context"
 	reflect "reflect"
 	shortener "url-shortnener/shortener"
 
@@ -35,30 +36,30 @@ func (m *MockShortDAO) EXPECT() *MockShortDAOMockRecorder {
 }
 
 // GetShort mocks base method.
-func (m *MockShortDAO) GetShort(redirect_path string) (*shortener.Short, error) {
+func (m *MockShortDAO) GetShort(ctx context.Context, redirect_path string) (*shortener.Short, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetShort", redirect_path)
+	ret := m.ctrl.Call(m, "GetShort", ctx, redirect_path)
 	ret0, _ := ret[0].(*shortener.Short)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetShort indicates an expected call of GetShort.
-func (mr *MockShortDAOMockRecorder) GetShort(redirect_path interface{}) *gomock.Call {
+func (mr *MockShortDAOMockRecorder) GetShort(ctx, redirect_path interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetShort", reflect.TypeOf((*MockShortDAO)(nil).GetShort), redirect_path)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetShort", reflect.TypeOf((*MockShortDAO)(nil).GetShort), ctx, redirect_path)
 }
 
 // InsertShort mocks base method.
-func (m *MockShortDAO) InsertShort(short shortener.Short) error {
+func (m *MockShortDAO) InsertShort(ctx context.Context, short shortener.Short) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "InsertShort", short)
+	ret := m.ctrl.Call(m, "InsertShort", ctx, short)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // InsertShort indicates an expected call of InsertShort.
-func (mr *MockShortDAOMockRecorder) InsertShort(short interface{}) *gomock.Call {
+func (mr *MockShortDAOMockRecorder) InsertShort(ctx, short interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertShort", reflect.TypeOf((*MockShortDAO)(nil).InsertShort), short)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "InsertShort", reflect.TypeOf((*MockShortDAO)(nil).InsertShort), ctx, short)
 }

@@ -69,7 +69,7 @@ func NewCreateShortHandler(dao ShortDAO) func(w http.ResponseWriter, r *http.Req
 			return
 		}
 
-		err = dao.InsertShort(*short)
+		err = dao.InsertShort(r.Context(), *short)
 		if err != nil {
 			log.Printf("failed to insert short value %s: %v", short.RedirectPath, err)
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -86,7 +86,7 @@ func NewGetShortHandler(dao ShortDAO) func(w http.ResponseWriter, r *http.Reques
 		vars := mux.Vars(r)
 		short_url := vars["short"]
 
-		short, err := dao.GetShort(short_url)
+		short, err := dao.GetShort(r.Context(), short_url)
 		if err != nil {
 			if err == sql.ErrNoRows {
 				log.Printf("%s short not found: %v", short_url, err)

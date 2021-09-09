@@ -3,6 +3,7 @@
 package shortener_test
 
 import (
+	"context"
 	"database/sql/driver"
 	"regexp"
 	"testing"
@@ -98,7 +99,7 @@ func TestInsertShort(t *testing.T) {
 			mock.ExpectCommit()
 
 			dao := shortener.NewShortPostgresDao(db, "postgres")
-			err = dao.InsertShort(short)
+			err = dao.InsertShort(context.Background(), short)
 			if err != nil {
 				t.Logf("failed to insert: %v", err)
 			}

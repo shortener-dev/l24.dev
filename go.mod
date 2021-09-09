@@ -9,6 +9,7 @@ require (
 	github.com/gavv/httpexpect/v2 v2.3.1
 	github.com/golang/mock v1.6.0
 	github.com/gorilla/mux v1.8.0
+	github.com/hashicorp/go-multierror v1.1.1
 	github.com/jmoiron/sqlx v1.3.4
 	github.com/lib/pq v1.10.2
 	github.com/pressly/goose/v3 v3.1.0
@@ -22,6 +23,7 @@ require (
 	github.com/fatih/structs v1.1.0 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
+	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/imkira/go-interpol v1.1.0 // indirect
 	github.com/klauspost/compress v1.13.5 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
