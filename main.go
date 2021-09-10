@@ -10,6 +10,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/pressly/goose/v3"
+	"github.com/rs/cors"
 )
 
 func main() {
@@ -36,8 +37,17 @@ func main() {
 	router.HandleFunc("/short", createShortHandler).Methods(http.MethodPost)
 	router.HandleFunc("/", func(rw http.ResponseWriter, r *http.Request) { rw.WriteHeader(200) })
 
+	c := cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:3000", "http://localhost:5000", "https://shortener.dev"},
+		AllowCredentials: true,
+		AllowedHeaders:   []string{"*"},
+		AllowedMethods:   []string{"GET", "HEAD", "POST"},
+	})
+
+	router.Use(mux.CORSMethodMiddleware(router))
+
 	srv := &http.Server{
-		Handler:      router,
+		Handler:      c.Handler(router),
 		Addr:         "0.0.0.0:8080",
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
