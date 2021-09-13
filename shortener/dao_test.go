@@ -4,7 +4,6 @@ package shortener_test
 
 import (
 	"context"
-	"database/sql/driver"
 	"regexp"
 	"testing"
 	"url-shortnener/shortener"
@@ -21,44 +20,79 @@ func TestInsertShort(t *testing.T) {
 		Host          string
 		Path          string
 		Query         string
+		Fragment      string
 		ShouldFail    bool
 	}
 
 	testCases := []testCase{
 		{
 			Name:          "Short with Path Only",
-			ExpectedQuery: shortener.InsertShortWithPathQuery,
+			ExpectedQuery: "INSERT INTO urls (redirect_path, scheme, host, path) VALUES ('test', 'http', 'github.com', '/DATA-DOG/go-sqlmock')",
 			Scheme:        "http",
 			Host:          "github.com",
 			Path:          "/DATA-DOG/go-sqlmock",
 			Query:         "",
+			Fragment:      "",
 			ShouldFail:    false,
 		},
 		{
 			Name:          "Short with Query Only",
-			ExpectedQuery: shortener.InsertShortWithQueryQuery,
+			ExpectedQuery: "INSERT INTO urls (redirect_path, scheme, host, query) VALUES ('test', 'http', 'github.com', 'test=value')",
 			Scheme:        "http",
 			Host:          "github.com",
 			Path:          "",
 			Query:         "test=value",
+			Fragment:      "",
 			ShouldFail:    false,
 		},
 		{
-			Name:          "Short with Everything",
-			ExpectedQuery: shortener.InsertShortWithAllQuery,
-			Scheme:        "http",
-			Host:          "github.com",
-			Path:          "/soggycactus",
-			Query:         "test=value",
-			ShouldFail:    false,
-		},
-		{
-			Name:          "Short with Nothing",
-			ExpectedQuery: shortener.InsertShortQuery,
+			Name:          "Short with Fragment Only",
+			ExpectedQuery: "INSERT INTO urls (redirect_path, scheme, host, fragment) VALUES ('test', 'http', 'github.com', 'info')",
 			Scheme:        "http",
 			Host:          "github.com",
 			Path:          "",
 			Query:         "",
+			Fragment:      "info",
+			ShouldFail:    false,
+		},
+		{
+			Name:          "Short with Path & Fragment",
+			ExpectedQuery: "INSERT INTO urls (redirect_path, scheme, host, path, fragment) VALUES ('test', 'http', 'github.com', '/soggycactus', 'info')",
+			Scheme:        "http",
+			Host:          "github.com",
+			Path:          "/soggycactus",
+			Query:         "",
+			Fragment:      "info",
+			ShouldFail:    false,
+		},
+		{
+			Name:          "Short with Query & Fragment",
+			ExpectedQuery: "INSERT INTO urls (redirect_path, scheme, host, query, fragment) VALUES ('test', 'http', 'github.com', 'test=value', 'info')",
+			Scheme:        "http",
+			Host:          "github.com",
+			Path:          "",
+			Query:         "test=value",
+			Fragment:      "info",
+			ShouldFail:    false,
+		},
+		{
+			Name:          "Short with Everything",
+			ExpectedQuery: "INSERT INTO urls (redirect_path, scheme, host, path, query, fragment) VALUES ('test', 'http', 'github.com', '/soggycactus', 'test=value', 'info')",
+			Scheme:        "http",
+			Host:          "github.com",
+			Path:          "/soggycactus",
+			Query:         "test=value",
+			Fragment:      "info",
+			ShouldFail:    false,
+		},
+		{
+			Name:          "Short with Nothing",
+			ExpectedQuery: "INSERT INTO urls (redirect_path, scheme, host) VALUES ('test', 'http', 'github.com')",
+			Scheme:        "http",
+			Host:          "github.com",
+			Path:          "",
+			Query:         "",
+			Fragment:      "",
 			ShouldFail:    false,
 		},
 	}
@@ -77,24 +111,11 @@ func TestInsertShort(t *testing.T) {
 				Host:         test.Host,
 				Path:         &test.Path,
 				Query:        &test.Query,
-			}
-
-			var args []driver.Value
-			args = append(args, "test")
-			args = append(args, test.Scheme)
-			args = append(args, test.Host)
-
-			if test.Path != "" {
-				args = append(args, test.Path)
-			}
-
-			if test.Query != "" {
-				args = append(args, test.Query)
+				Fragment:     &test.Fragment,
 			}
 
 			mock.ExpectBegin()
 			mock.ExpectExec(regexp.QuoteMeta(test.ExpectedQuery)).
-				WithArgs(args...).
 				WillReturnResult(sqlmock.NewResult(1, 1))
 			mock.ExpectCommit()
 

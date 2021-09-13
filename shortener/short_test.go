@@ -11,12 +11,12 @@ import (
 )
 
 func TestDuplicateURLsAreUnique(t *testing.T) {
-	short1, err := shortener.NewShort("http", "lucastephens.com", "resume.pdf", "")
+	short1, err := shortener.NewShort("http", "lucastephens.com", "resume.pdf", "", "")
 	if err != nil {
 		t.Fatalf("failed to create short: %v", err)
 	}
 
-	short2, err := shortener.NewShort("http", "lucastephens.com", "resume.pdf", "")
+	short2, err := shortener.NewShort("http", "lucastephens.com", "resume.pdf", "", "")
 	if err != nil {
 		t.Fatalf("failed to create short: %v", err)
 	}
@@ -38,52 +38,75 @@ func TestDuplicateURLsAreUnique(t *testing.T) {
 
 func TestNewShort(t *testing.T) {
 	type testCase struct {
-		Name   string
-		Scheme string
-		Host   string
-		Path   string
-		Query  string
-		RawURL string
+		Name     string
+		Scheme   string
+		Host     string
+		Path     string
+		Query    string
+		Fragment string
+		RawURL   string
 	}
 
 	testCases := []testCase{
 		{
-			Name:   "Short with Everything",
-			Scheme: "http",
-			Host:   "lucastephens.com",
-			Path:   "resume.pdf",
-			Query:  "?a=b&c=d",
-			RawURL: "http://lucastephens.com/resume.pdf?a=b&c=d",
+			Name:     "Short with Everything",
+			Scheme:   "http",
+			Host:     "lucastephens.com",
+			Path:     "resume.pdf",
+			Query:    "?a=b&c=d",
+			Fragment: "#info",
+			RawURL:   "http://lucastephens.com/resume.pdf?a=b&c=d#info",
 		},
 		{
-			Name:   "Short with Path Only",
-			Scheme: "http",
-			Host:   "lucastephens.com",
-			Path:   "resume.pdf",
-			Query:  "",
-			RawURL: "http://lucastephens.com/resume.pdf",
+			Name:     "Short with Path Only",
+			Scheme:   "http",
+			Host:     "lucastephens.com",
+			Path:     "resume.pdf",
+			Query:    "",
+			Fragment: "",
+			RawURL:   "http://lucastephens.com/resume.pdf",
 		},
 		{
-			Name:   "Short with Query Only",
-			Scheme: "http",
-			Host:   "lucastephens.com",
-			Path:   "",
-			Query:  "?a=b&c=d",
-			RawURL: "http://lucastephens.com?a=b&c=d",
+			Name:     "Short with Query Only",
+			Scheme:   "http",
+			Host:     "lucastephens.com",
+			Path:     "",
+			Query:    "?a=b&c=d",
+			Fragment: "",
+			RawURL:   "http://lucastephens.com?a=b&c=d",
 		},
 		{
-			Name:   "Short with Nothing",
-			Scheme: "http",
-			Host:   "lucastephens.com",
-			Path:   "",
-			Query:  "",
-			RawURL: "http://lucastephens.com",
+			Name:     "Short with Fragment Only",
+			Scheme:   "http",
+			Host:     "lucastephens.com",
+			Path:     "",
+			Query:    "",
+			Fragment: "#info",
+			RawURL:   "http://lucastephens.com#info",
+		},
+		{
+			Name:     "Short with Nothing",
+			Scheme:   "http",
+			Host:     "lucastephens.com",
+			Path:     "",
+			Query:    "",
+			Fragment: "",
+			RawURL:   "http://lucastephens.com",
+		},
+		{
+			Name:     "Short with Host Path Fragment",
+			Scheme:   "https",
+			Host:     "mail.google.com",
+			Path:     "/mail/u/2/",
+			Query:    "",
+			Fragment: "inbox",
+			RawURL:   "https://mail.google.com/mail/u/2/#inbox",
 		},
 	}
 
 	for _, test := range testCases {
 		t.Run(test.Name, func(t *testing.T) {
-			short, err := shortener.NewShort(test.Scheme, test.Host, test.Path, test.Query)
+			short, err := shortener.NewShort(test.Scheme, test.Host, test.Path, test.Query, test.Fragment)
 			if err != nil {
 				t.Fatalf("failed to create short: %v", err)
 			}

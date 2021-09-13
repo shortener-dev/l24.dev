@@ -13,52 +13,54 @@ type Short struct {
 	Host         string  `json:"host" db:"host"`
 	Path         *string `json:"path" db:"path"`
 	Query        *string `json:"query" db:"query"`
+	Fragment     *string `json:"fragment" db:"fragment"`
 }
 
 func (s *Short) RawURL() string {
-	switch {
-	case isNilOrEmptyString(s.Path) && isNilOrEmptyString(s.Query):
-		return s.Scheme + "://" + s.Host
-	case isNilOrEmptyString(s.Path):
-		return s.Scheme + "://" + s.Host + "?" + *s.Query
-	case isNilOrEmptyString(s.Query):
-		return s.Scheme + "://" + s.Host + *s.Path
-	default:
-		return s.Scheme + "://" + s.Host + *s.Path + "?" + *s.Query
+	url := s.Scheme + "://" + s.Host
+
+	if !isNilOrEmptyString(s.Path) {
+		url += *s.Path
 	}
+
+	if !isNilOrEmptyString(s.Query) {
+		url += "?" + *s.Query
+	}
+
+	if !isNilOrEmptyString(s.Fragment) {
+		url += "#" + *s.Fragment
+	}
+
+	return url
 }
 
-func NewShort(scheme, host, path, query string) (*Short, error) {
-	var urlBody string
-
+func NewShort(scheme, host, path, query, fragment string) (*Short, error) {
 	if !strings.HasPrefix(path, "/") && path != "" {
 		path = "/" + path
 	}
 
-	if query != "" {
-		if !strings.HasPrefix(query, "?") {
-			urlBody = host + path + "?" + query
-		} else {
-			urlBody = host + path + query
-			query = query[1:]
-		}
-
-	} else {
-		urlBody = host + path
+	if strings.HasPrefix(query, "?") {
+		query = query[1:]
 	}
 
-	hash, err := createHash(urlBody)
+	if strings.HasPrefix(fragment, "#") {
+		fragment = fragment[1:]
+	}
+
+	short := &Short{
+		Scheme:   scheme,
+		Host:     host,
+		Path:     &path,
+		Query:    &query,
+		Fragment: &fragment,
+	}
+
+	hash, err := createHash(short.RawURL())
 	if err != nil {
 		return nil, err
 	}
 
-	short := &Short{
-		RedirectPath: *hash,
-		Scheme:       scheme,
-		Host:         host,
-		Path:         &path,
-		Query:        &query,
-	}
+	short.RedirectPath = *hash
 
 	return short, nil
 }

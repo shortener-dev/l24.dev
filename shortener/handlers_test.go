@@ -17,46 +17,69 @@ import (
 
 func TestCreateShortHandler(t *testing.T) {
 	type testCase struct {
-		Name           string
-		URL            string
-		ExpectedScheme string
-		ExpectedHost   string
-		ExpectedPath   string
-		ExpectedQuery  string
+		Name             string
+		URL              string
+		ExpectedScheme   string
+		ExpectedHost     string
+		ExpectedPath     string
+		ExpectedQuery    string
+		ExpectedFragment string
 	}
 
 	testCases := []testCase{
 		{
-			Name:           "Short with Nothing",
-			URL:            "lucastephens.com",
-			ExpectedScheme: "http",
-			ExpectedHost:   "lucastephens.com",
-			ExpectedPath:   "",
-			ExpectedQuery:  "",
+			Name:             "Short with Nothing",
+			URL:              "lucastephens.com",
+			ExpectedScheme:   "http",
+			ExpectedHost:     "lucastephens.com",
+			ExpectedPath:     "",
+			ExpectedQuery:    "",
+			ExpectedFragment: "",
 		},
 		{
-			Name:           "Short with Path",
-			URL:            "lucastephens.com/resume.pdf",
-			ExpectedScheme: "http",
-			ExpectedHost:   "lucastephens.com",
-			ExpectedPath:   "/resume.pdf",
-			ExpectedQuery:  "",
+			Name:             "Short with Path",
+			URL:              "lucastephens.com/resume.pdf",
+			ExpectedScheme:   "http",
+			ExpectedHost:     "lucastephens.com",
+			ExpectedPath:     "/resume.pdf",
+			ExpectedQuery:    "",
+			ExpectedFragment: "",
 		},
 		{
-			Name:           "Short with Query",
-			URL:            "lucastephens.com?a=b&c=d",
-			ExpectedScheme: "http",
-			ExpectedHost:   "lucastephens.com",
-			ExpectedPath:   "",
-			ExpectedQuery:  "a=b&c=d",
+			Name:             "Short with Query",
+			URL:              "lucastephens.com?a=b&c=d",
+			ExpectedScheme:   "http",
+			ExpectedHost:     "lucastephens.com",
+			ExpectedPath:     "",
+			ExpectedQuery:    "a=b&c=d",
+			ExpectedFragment: "",
 		},
 		{
-			Name:           "Short with Everything",
-			URL:            "lucastephens.com/resume.pdf?a=b&c=d",
-			ExpectedScheme: "http",
-			ExpectedHost:   "lucastephens.com",
-			ExpectedPath:   "/resume.pdf",
-			ExpectedQuery:  "a=b&c=d",
+			Name:             "Short with Fragment",
+			URL:              "lucastephens.com#info",
+			ExpectedScheme:   "http",
+			ExpectedHost:     "lucastephens.com",
+			ExpectedPath:     "",
+			ExpectedQuery:    "",
+			ExpectedFragment: "info",
+		},
+		{
+			Name:             "Short with Everything",
+			URL:              "lucastephens.com/resume.pdf?a=b&c=d#info",
+			ExpectedScheme:   "http",
+			ExpectedHost:     "lucastephens.com",
+			ExpectedPath:     "/resume.pdf",
+			ExpectedQuery:    "a=b&c=d",
+			ExpectedFragment: "info",
+		},
+		{
+			Name:             "Short with Host Path Fragment",
+			URL:              "https://mail.google.com/mail/u/2/#inbox",
+			ExpectedScheme:   "https",
+			ExpectedHost:     "mail.google.com",
+			ExpectedPath:     "/mail/u/2/",
+			ExpectedQuery:    "",
+			ExpectedFragment: "inbox",
 		},
 	}
 
@@ -81,12 +104,13 @@ func TestCreateShortHandler(t *testing.T) {
 				Expect().
 				Status(http.StatusOK).JSON().Object()
 
-			response.Keys().ContainsOnly("redirect_path", "scheme", "host", "path", "query")
+			response.Keys().ContainsOnly("redirect_path", "scheme", "host", "path", "query", "fragment")
 			response.Value("redirect_path").NotNull().String()
 			response.Value("scheme").NotNull().String().Equal(test.ExpectedScheme)
 			response.Value("host").NotNull().String().Equal(test.ExpectedHost)
 			response.Value("path").NotNull().String().Equal(test.ExpectedPath)
 			response.Value("query").NotNull().String().Equal(test.ExpectedQuery)
+			response.Value("fragment").NotNull().String().Equal(test.ExpectedFragment)
 		})
 	}
 }

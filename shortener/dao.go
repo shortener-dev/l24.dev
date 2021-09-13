@@ -3,6 +3,8 @@ package shortener
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"strings"
 
 	"github.com/hashicorp/go-multierror"
 	"github.com/jmoiron/sqlx"
@@ -10,11 +12,8 @@ import (
 )
 
 const (
-	InsertShortQuery          = "INSERT INTO urls (redirect_path, scheme, host) VALUES ($1,$2,$3)"
-	InsertShortWithPathQuery  = "INSERT INTO urls (redirect_path, scheme, host, path) VALUES ($1,$2,$3,$4)"
-	InsertShortWithQueryQuery = "INSERT INTO urls (redirect_path, scheme, host, query) VALUES ($1,$2,$3,$4)"
-	InsertShortWithAllQuery   = "INSERT INTO urls (redirect_path, scheme, host, path, query) VALUES ($1,$2,$3,$4,$5)"
-	GetShortQuery             = "SELECT redirect_path, scheme, host, path, query FROM urls WHERE redirect_path=$1"
+	InsertShortQuery = "INSERT INTO urls (%v) VALUES (%v)"
+	GetShortQuery    = "SELECT redirect_path, scheme, host, path, query, fragment FROM urls WHERE redirect_path=$1"
 )
 
 type ShortDAO interface {
@@ -34,66 +33,50 @@ type ShortPostgresDAO struct {
 func (s *ShortPostgresDAO) InsertShort(ctx context.Context, short Short) error {
 	db := sqlx.NewDb(s.db, s.driver)
 
-	var err error
-
-	switch {
-	case isNilOrEmptyString(short.Path) && isNilOrEmptyString(short.Query):
-		err = executeTransaction(
-			ctx,
-			*db,
-			InsertShortQuery,
-			short.RedirectPath,
-			short.Scheme,
-			short.Host,
-		)
-	case isNilOrEmptyString(short.Path):
-		err = executeTransaction(
-			ctx,
-			*db,
-			InsertShortWithQueryQuery,
-			short.RedirectPath,
-			short.Scheme,
-			short.Host,
-			short.Query,
-		)
-	case isNilOrEmptyString(short.Query):
-		err = executeTransaction(
-			ctx,
-			*db,
-			InsertShortWithPathQuery,
-			short.RedirectPath,
-			short.Scheme,
-			short.Host,
-			short.Path,
-		)
-	default:
-		err = executeTransaction(
-			ctx,
-			*db,
-			InsertShortWithAllQuery,
-			short.RedirectPath,
-			short.Scheme,
-			short.Host,
-			short.Path,
-			short.Query,
-		)
-	}
-
-	return err
+	query := BuildInsertQuery(short)
+	return executeTransaction(ctx, *db, query)
 }
 
 func (s *ShortPostgresDAO) GetShort(ctx context.Context, redirect_path string) (*Short, error) {
 	db := sqlx.NewDb(s.db, s.driver)
 
-	row := db.QueryRowxContext(ctx, GetShortQuery, redirect_path)
-
 	var short Short
-	err := row.StructScan(&short)
+	err := db.GetContext(ctx, &short, GetShortQuery, redirect_path)
 	if err != nil {
 		return nil, err
 	}
 
 	return &short, nil
+}
+
+func BuildInsertQuery(short Short) string {
+	columns := []string{"redirect_path", "scheme", "host"}
+
+	values := []string{
+		addSingleQuotes(short.RedirectPath),
+		addSingleQuotes(short.Scheme),
+		addSingleQuotes(short.Host),
+	}
+
+	if !isNilOrEmptyString(short.Path) {
+		columns = append(columns, "path")
+		values = append(values, addSingleQuotes(*short.Path))
+	}
+
+	if !isNilOrEmptyString(short.Query) {
+		columns = append(columns, "query")
+		values = append(values, addSingleQuotes(*short.Query))
+	}
+
+	if !isNilOrEmptyString(short.Fragment) {
+		columns = append(columns, "fragment")
+		values = append(values, addSingleQuotes(*short.Fragment))
+	}
+
+	columnsString := strings.Join(columns, ", ")
+	valuesString := strings.Join(values, ", ")
+
+	return fmt.Sprintf(InsertShortQuery, columnsString, valuesString)
 }
 
 func isNilOrEmptyString(text *string) bool {
@@ -108,6 +91,10 @@ func isNilOrEmptyString(text *string) bool {
 	return false
 }
 
+func addSingleQuotes(s string) string {
+	return "'" + s + "'"
+}
+
 func executeTransaction(ctx context.Context, db sqlx.DB, query string, args ...interface{}) error {
 	var err error
 	tx, err := db.Beginx()
@@ -120,6 +107,7 @@ func executeTransaction(ctx context.Context, db sqlx.DB, query string, args ...i
 		query,
 		args...,
 	)
+
 	if err != nil {
 		if rollbackErr := tx.Rollback(); rollbackErr != nil {
 			err = multierror.Append(err, rollbackErr)

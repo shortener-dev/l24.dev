@@ -62,7 +62,7 @@ func NewCreateShortHandler(dao ShortDAO) func(w http.ResponseWriter, r *http.Req
 			return
 		}
 
-		short, err := NewShort(URL.Scheme, URL.Host, URL.Path, URL.RawQuery)
+		short, err := NewShort(URL.Scheme, URL.Host, URL.Path, URL.RawQuery, URL.Fragment)
 		if err != nil {
 			log.Printf("failed to create short: %v", err)
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -97,6 +97,8 @@ func NewGetShortHandler(dao ShortDAO) func(w http.ResponseWriter, r *http.Reques
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
+		log.Print(short.Fragment)
+		log.Print(short.RawURL())
 		http.Redirect(w, r, short.RawURL(), http.StatusMovedPermanently)
 	}
 }
