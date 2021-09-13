@@ -97,8 +97,6 @@ func NewGetShortHandler(dao ShortDAO) func(w http.ResponseWriter, r *http.Reques
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
-		log.Print(short.Fragment)
-		log.Print(short.RawURL())
 		http.Redirect(w, r, short.RawURL(), http.StatusMovedPermanently)
 	}
 }
