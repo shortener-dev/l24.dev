@@ -33,7 +33,7 @@ type ShortPostgresDAO struct {
 func (s *ShortPostgresDAO) InsertShort(ctx context.Context, short Short) error {
 	db := sqlx.NewDb(s.db, s.driver)
 
-	query := BuildInsertQuery(short)
+	query := s.buildInsertQuery(short)
 	return executeTransaction(ctx, *db, query)
 }
 
@@ -49,7 +49,7 @@ func (s *ShortPostgresDAO) GetShort(ctx context.Context, redirect_path string) (
 	return &short, nil
 }
 
-func BuildInsertQuery(short Short) string {
+func (s *ShortPostgresDAO) buildInsertQuery(short Short) string {
 	columns := []string{"redirect_path", "scheme", "host"}
 
 	values := []string{
