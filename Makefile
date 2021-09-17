@@ -1,17 +1,19 @@
 .PHONY: build clean test
 
+TAG := $(shell git rev-list --count HEAD)-$(shell git rev-parse --short=12 HEAD)
+
 build:
 	export GO111MODULE=on
-	go build -mod=vendor -ldflags="-s -w" -o bin/main main.go
+	go build -ldflags="-s -w" -o bin/main main.go
 
 clean:
 	rm -rf ./bin Gopkg.lock *.out
 
 unit-test:
-	@go test -v -mod=vendor ./... -tags=unit
+	@go test -v ./... -tags=unit
 
 unit-coverage:
-	@go test -coverprofile=unit_coverage.out -mod=vendor ./... -coverpkg=./... -tags=unit
+	@go test -coverprofile=unit_coverage.out ./... -coverpkg=./... -tags=unit
 
 view-coverage: unit-coverage
 	@go tool cover -html=unit_coverage.out
@@ -27,3 +29,7 @@ goose-down:
 
 lint:
 	@golangci-lint run
+
+push-to-gcr:
+	docker build --tag=gcr.io/l24-dev/l24-dev:$(TAG) .
+	docker push gcr.io/l24-dev/l24-dev:$(TAG)

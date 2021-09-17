@@ -5,11 +5,11 @@ package shortener_test
 import (
 	"database/sql"
 	"errors"
+	"l24.dev/shortener"
+	"l24.dev/test/mocks"
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"url-shortnener/shortener"
-	"url-shortnener/test/mocks"
 
 	"github.com/gavv/httpexpect/v2"
 	"github.com/golang/mock/gomock"

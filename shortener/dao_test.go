@@ -4,9 +4,9 @@ package shortener_test
 
 import (
 	"context"
+	"l24.dev/shortener"
 	"regexp"
 	"testing"
-	"url-shortnener/shortener"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/stretchr/testify/assert"

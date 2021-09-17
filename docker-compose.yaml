@@ -12,5 +12,15 @@ services:
     volumes:
       - postgres:/var/lib/postgresql/data
 
+  shortener:
+    depends_on: 
+      - postgres
+    build: .
+    environment:
+      DBSTRING: "user=user dbname=public password=password host=postgres sslmode=disable"
+      DRIVER: "postgres"
+    ports:
+      - 8080:8080
+
 volumes: 
   postgres: {}

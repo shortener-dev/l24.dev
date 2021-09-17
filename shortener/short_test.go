@@ -3,9 +3,9 @@
 package shortener_test
 
 import (
+	"l24.dev/shortener"
 	"strings"
 	"testing"
-	"url-shortnener/shortener"
 
 	"github.com/stretchr/testify/assert"
 )

@@ -1,6 +1,6 @@
 // +heroku goVersion go1.17
 
-module url-shortnener
+module l24.dev
 
 go 1.17
 
