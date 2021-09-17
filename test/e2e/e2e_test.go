@@ -8,7 +8,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"testing"
-	"url-shortnener/shortener"
+
+	"l24.dev/shortener"
 
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq" // Postgres Driver

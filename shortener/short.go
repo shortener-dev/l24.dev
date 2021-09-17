@@ -39,13 +39,9 @@ func NewShort(scheme, host, path, query, fragment string) (*Short, error) {
 		path = "/" + path
 	}
 
-	if strings.HasPrefix(query, "?") {
-		query = query[1:]
-	}
+	query = strings.TrimPrefix(query, "?")
 
-	if strings.HasPrefix(fragment, "#") {
-		fragment = fragment[1:]
-	}
+	fragment = strings.TrimPrefix(fragment, "#")
 
 	short := &Short{
 		Scheme:   scheme,

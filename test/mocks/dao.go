@@ -6,8 +6,8 @@ package mocks
 
 import (
 	context "context"
+	shortener "l24.dev/shortener"
 	reflect "reflect"
-	shortener "url-shortnener/shortener"
 
 	gomock "github.com/golang/mock/gomock"
 )
