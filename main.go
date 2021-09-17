@@ -16,6 +16,7 @@ import (
 
 func main() {
 	dbstring := os.Getenv("DBSTRING")
+	log.Print(dbstring[67:])
 	driver := "postgres"
 
 	db, err := sql.Open(driver, dbstring)
