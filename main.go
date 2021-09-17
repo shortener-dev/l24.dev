@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -15,27 +14,8 @@ import (
 	"github.com/rs/cors"
 )
 
-func getDBString() string {
-	// These environment variables are set automatically by Cloud Run
-	user := os.Getenv("DB_USER")
-	pass := os.Getenv("DB_PASS")
-	host := os.Getenv("DB_HOST")
-	port := os.Getenv("DB_PORT")
-	name := os.Getenv("DB_NAME")
-
-	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", user, pass, host, port, name)
-}
-
 func main() {
-	var dbstring string
-
-	// DBSTRING is filled out in local dev
-	dbstring = os.Getenv("DBSTRING")
-	// If not present, user the env vars set by Cloud Run
-	if dbstring == "" {
-		log.Print("DBSTRING not present, looking for Cloud Run env vars")
-		dbstring = getDBString()
-	}
+	dbstring := os.Getenv("DBSTRING")
 	driver := os.Getenv("DRIVER")
 
 	db, err := sql.Open(driver, dbstring)
