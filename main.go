@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -15,8 +16,11 @@ import (
 )
 
 func main() {
-	dbstring := os.Getenv("DBSTRING")
-	log.Print(dbstring[67:])
+	host := os.Getenv("DB_HOST")
+	user := os.Getenv("DB_USER")
+	pass := os.Getenv("DB_PASS")
+	name := os.Getenv("DB_NAME")
+	dbstring := fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=disable", host, user, pass, name)
 	driver := "postgres"
 
 	db, err := sql.Open(driver, dbstring)
