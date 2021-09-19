@@ -8,7 +8,6 @@ import (
 	"log"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"testing"
 
 	"l24.dev/shortener"
@@ -21,12 +20,7 @@ import (
 )
 
 func TestCreateAndGet(t *testing.T) {
-	host := os.Getenv("POSTGRES_HOST")
-	if host == "" {
-		t.Log("POSTGRES_HOST not set, using localhost")
-		host = "localhost"
-	}
-	dbstring := fmt.Sprintf("user=user dbname=public password=password host=%s sslmode=disable", host)
+	dbstring := fmt.Sprintf("user=user dbname=public password=password host=localhost sslmode=disable")
 	driver := "postgres"
 
 	db, err := sql.Open(driver, dbstring)
