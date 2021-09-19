@@ -4,7 +4,7 @@ on: [pull_request]
 
 jobs:
   test:
-    name: Tests
+    name: Unit Tests
     strategy:
       matrix:
         go-version: [1.17]

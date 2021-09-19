@@ -4,26 +4,38 @@ package e2e
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"testing"
 
 	"l24.dev/shortener"
 
 	"github.com/gorilla/mux"
 	_ "github.com/lib/pq" // Postgres Driver
+	"github.com/pressly/goose/v3"
 
 	"github.com/gavv/httpexpect/v2"
 )
 
 func TestCreateAndGet(t *testing.T) {
-	dbstring := "user=user dbname=public password=password host=localhost sslmode=disable"
+	host := os.Getenv("POSTGRES_HOST")
+	if host == "" {
+		host = "localhost"
+	}
+	dbstring := fmt.Sprintf("user=user dbname=public password=password host=%s sslmode=disable", host)
 	driver := "postgres"
 
 	db, err := sql.Open(driver, dbstring)
 	if err != nil {
 		log.Fatalf("failed to open database: %v", err)
+	}
+
+	err = goose.Up(db, "../../migrations")
+	if err != nil {
+		log.Fatalf("failed to run migrations: %v", err)
 	}
 
 	dao := shortener.NewShortPostgresDao(db, driver)
