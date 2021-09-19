@@ -44,13 +44,11 @@ func main() {
 	router.HandleFunc("/", func(rw http.ResponseWriter, r *http.Request) { rw.WriteHeader(200) })
 
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:3000", "http://localhost:5000", "https://shortener.dev"},
+		AllowedOrigins:   []string{"https://shortener.dev"},
 		AllowCredentials: true,
 		AllowedHeaders:   []string{"*"},
 		AllowedMethods:   []string{"GET", "HEAD", "POST"},
 	})
-
-	router.Use(mux.CORSMethodMiddleware(router))
 
 	srv := &http.Server{
 		Handler:      c.Handler(router),

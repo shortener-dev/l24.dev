@@ -18,6 +18,9 @@ unit-coverage:
 view-coverage: unit-coverage
 	@go tool cover -html=unit_coverage.out
 
+e2e-test:
+	@go test -v ./... -tags=e2e
+
 migration:
 	goose -dir=migrations create $(file) $(dialect)
 
@@ -29,7 +32,3 @@ goose-down:
 
 lint:
 	@golangci-lint run
-
-push-to-gcr:
-	docker build --tag=gcr.io/l24-dev/l24-dev:$(TAG) .
-	docker push gcr.io/l24-dev/l24-dev:$(TAG)
