@@ -23,6 +23,7 @@ import (
 func TestCreateAndGet(t *testing.T) {
 	host := os.Getenv("POSTGRES_HOST")
 	if host == "" {
+		t.Log("POSTGRES_HOST not set, using localhost")
 		host = "localhost"
 	}
 	dbstring := fmt.Sprintf("user=user dbname=public password=password host=%s sslmode=disable", host)
