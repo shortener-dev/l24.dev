@@ -42,6 +42,7 @@ func main() {
 	router.HandleFunc("/{short}", getShortHandler).Methods(http.MethodGet)
 	router.HandleFunc("/short", createShortHandler).Methods(http.MethodPost)
 	router.HandleFunc("/", func(rw http.ResponseWriter, r *http.Request) { rw.WriteHeader(200) })
+	router.HandleFunc("/health", func(rw http.ResponseWriter, r *http.Request) { rw.WriteHeader(200) })
 
 	c := cors.New(cors.Options{
 		AllowedOrigins:   []string{"https://shortener.dev"},
